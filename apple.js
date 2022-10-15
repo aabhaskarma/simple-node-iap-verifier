@@ -1,3 +1,6 @@
+
+
+// https://developer.apple.com/documentation/appstorereceipts/verifyreceipt
 const axios = require('axios');
 
 const ERROR_MAP = {
@@ -12,12 +15,13 @@ const ERROR_MAP = {
 	2: 'The receipt is valid, but purchased nothing.'
 };
 
-const URL = 'https://buy.itunes.apple.com/verifyReceipt';
+const PROD_URL = 'https://buy.itunes.apple.com/verifyReceipt';
+const SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
 
-const _request = (payload) => {
+const _request = (url, payload) => {
 	const { password, excludeOldTransactions, receipt } = payload;
 
-	return axios.post(URL, {
+	return axios.post(url, {
 		'exclude-old-transactions': excludeOldTransactions,
 		'password': password,
 		'receipt-data': receipt
@@ -31,6 +35,14 @@ const _request = (payload) => {
 		});
 };
 
+const _tryProd = (payload) => {
+	return _request(PROD_URL, payload);
+};
+
+const _trySandBox = (payload) => {
+	return _request(SANDBOX_URL, payload);
+};
+
 /**
  * @param {object} payload Apple request payload.
  * @param {string} payload.password Apple secret key.
@@ -38,7 +50,15 @@ const _request = (payload) => {
  * @param {string} payload.receipt Apple receipt.
  */
 const verify = async (payload) => {
-	let response = await _request(payload);
+	let response = await _tryProd(payload);
+
+	if (response.status !== 21007) {
+		throw new Error(ERROR_MAP[response.status] || 'Something went wrong.');
+	}
+
+	if (!response.status) return response;
+
+	response = await _trySandBox(payload);
 
 	if (response.status) {
 		throw new Error(ERROR_MAP[response.status] || 'Something went wrong.');
