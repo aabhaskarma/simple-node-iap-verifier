@@ -1,0 +1,14 @@
+{
+  "name": "simple-node-iap-verifier",
+  "version": "1.0.0",
+  "description": "A simple implementation for node IAP verifier",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "iap"
+  ],
+  "author": "aabhaskarma",
+  "license": "ISC"
+}
